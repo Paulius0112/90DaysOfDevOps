@@ -1,7 +1,7 @@
 # EC2
 
 - Is a web service that provides resizable compute capacity in the cloud. It reduces the time required to obtain and boot new server instances to minutes, allowing you to quickly scale capacity, both up and down, as your computing requirements change.
-- *Pricing Models*
+- **Pricing Models**
     1. **On Demand**
         - A fixed rate by the hour (or by the second) with no commitment. 
         - Low cost and flexibility with no upfront cost
@@ -54,7 +54,7 @@
 - Linux instances are charged by seconds, all other instances by hour
 - Data between instances in different regions is charged (in and out)
 
-__Security groups__
+## Security groups
 - All Inbound traffic is blocked by default
 - All Outbound traffic is allowed
 - Changes to Security groups take immediately
@@ -63,7 +63,7 @@ __Security groups__
 - You cannot block specific IP using security groups, only Network Access Control List
 - You can only specify allow rules, not deny
 
-__AMI__
+## AMI
 Can be selected on
 - Region
 - OS
@@ -75,9 +75,9 @@ Can be selected on
 - By default both ROOT volumes will be deleted on EC2 termination. However, with EBS volumes, you can tell AWS to keep the root device volume
 - You can't delete a snapshot of the root device of an EBS volume used by a registered AMI. You must first deregister the AMI before you can delete the snapshot.
 
+## ENI, ENA, EFA
 
-__ENI, ENA, EFA__
-- *ENI - elastic network interface*
+- **ENI - elastic network interface**
     - Essentially a virtual network card. Choose for basic networking, or manage multiple networks at low cost. Can include:
         1. Primary private IPv4 address from the IPv4 address range of your VPC
         2. One or more secondary private IPv4 addresses from the IPv4 address range of your VPC
@@ -98,7 +98,7 @@ __ENI, ENA, EFA__
     - Default interfaces are terminated with instance termination
         - Manually added interfaces are not terminated by default
         - You can change termination behavior
-- *EN - Enhanced networking*
+- **EN - Enhanced networking**
     - Uses single root I/O virtualization to provide high-performance networking capabilities on supported instance types
         1. Provides higher I/O performance and lower CPU utilization when compared to traditional virtualised network interface. Provides higher bandwidth, packet per second performance and lower inter-instance latencies. There is no additional charge for using enhanced networking, but EC2 must support it.
         2. To use where you want good network performance
@@ -106,29 +106,29 @@ __ENI, ENA, EFA__
             - *Elastic Network Adapter (ENA)* which supports network speeds of up to 100Gbps for supported instance types. Always choose this method
             - *Virtual Function (VF)* interface - suports network speeds of up to 10Gbps for supported instance types. This is typically used on older instances. 
         4. Choose for when you need speeds between 10Gbps and 100Gbps and reliable and high throughput.
-- *Elastic Fabric Adapter* 
+- **Elastic Fabric Adapter* *
     - A network device that you can attach to your EC2 instance to accelerate High Performance Computing and ML applications
     - Choose for when you need to accelerate High Performance Comouting (HPC) and ML applications or if you need to do an OS by-pass. 
 
 
-__EC2 placement groups__
+## EC2 placement groups
 - When you launch a new EC2 instance, the EC2 service **attempts to place the instance in such a way that all of your instances are spread out across underlying hardware to minimize correlated failures.**
 - The name for placement group must be **unique** within your AWS account
 - You cant merge placement groups
 - You can move existing instance into a placement group. Before you can move the instance, the instsance must be stopped. It *can only be achieved using AWS CLI or SDK*, not yet with a console
-1. *Clustered Placement group*
+1. **Clustered Placement group**
     - Grouping instances within a **single AZ** (put them very close together)
     - Recommented for applications that need **low network latency, high network throughput, or both**
     - Only **certain instances** can be launched in this group
     - Can't span multiple AZ, all other groups can
     - AWS recommneds **homogenous instances** within clustered placement group
-2. *Spread Placement group*
+2. **Spread Placement group**
     - Each instance is placed on **distinct** underlying hardware
     - Recommended for applications that have a small number of **critical instances that should be kept separate from each other**
         - For example if one applications fails, it should not effect the others
     - Can have in **different AZ within a region**
     - Think like separate instances
-3. *Partitioned*
+3. **Partitioned**
     - AWS divides each group into **logical segments called partitions.**
     - Each partition within a placement group has its own **set of racks**. Each eack has its **own network and power source.**
     - No two partitions within a placement group share the same racks, allowing you to **isolate** the impact of hardware failure within your application
@@ -136,12 +136,12 @@ __EC2 placement groups__
 
 
 
-__SPOT instances and fleets__
+## SPOT instances and fleets
 - Use unused EC2 capacity in the AWS cloud. Are available at up to 90% discount comparaed to On-Demand. Can use for stateless, fault-tolerant or flexiable applications, such as big data, containeriz workloads, CI/CD, web servers, HPC and other test workloads. They are not good for persistent workloads, critical jobs and databases
 - To use the Spot Instances, you must first decide on your maximum Spot price. The instance will be provisioned so long as the Spot price is below your maximum Spot price. Hourly spot price varies depending on capacity and region
 - If spot price goes above your maximum, you have two minutes to choose wheter to stop or terminate your instance
 - You can use *Spot block* to stop your Spot Instances from being terminated even if the Spot price goes over your maximum Spot price. You can set Spot blocks for between one to six hours currently. 
-- *Procces of creating a spot instance*
+- **Procces of creating a spot instance**
     1. Create a request (Maximum price, Desired amount of instances, Launch specifications, Request type (one time or persistent), Timeline (Valid from and valid until))
     2. Launch the instance. If the price increases, one time instances will be removed, while persistent will be removed and launched again once th eprice meets the criteria 
 
@@ -151,38 +151,38 @@ __Spot fleets__
 - Tasks done:
     1. Set up different launch pools. Define things like EC2 instance type, OS and AZ
     2. You can have multiple pools, and the fleet will choose the best way to implement depending on the strategy youd define. Strategies:
-        - *capacityOptimized* - The spot instances come from the pool with optimal capacity for the number of instances launching
-        - *diversified* - The spot instaces are distributed across all pools
-        - *lowerPrice* - the spot instances come from the pool with the lowest price. This is the default strategy
-        - *InstancePoolsToUseCount* - the spot instaces are distributed across the number of spot instance pool ypu specify. This parameter is valid only when used in combination with lowestPrice
+        - **capacityOptimized** - The spot instances come from the pool with optimal capacity for the number of instances launching
+        - **diversified** - The spot instaces are distributed across all pools
+        - **lowerPrice** - the spot instances come from the pool with the lowest price. This is the default strategy
+        - **InstancePoolsToUseCount** - the spot instaces are distributed across the number of spot instance pool ypu specify. This parameter is valid only when used in combination with lowestPrice
     3. Spot fleets will stop launching instances once you reach your price threshold or capacity desire
 
-__EC2 Hipernate__
+## EC2 Hipernate
 - When you hibernate an EC2 instance, the OS is told to perform hibernation. It saves the contents from the instance memory RAM to your EBS root volume.
 - OS does not need to reboot, since the RAM contents are reloaded, rovides much faster boot up
 - It requires to have root volume encryption
 - Instance RAM must be less than 150 GB
 - Can't be hibernated for more than 60 days
 
-__Cloudtrail__
+## Cloudtrail
 - increases visibility into your user and resource activity by recording AWS Management COnsole actions and API calls
 - Can create a **trail** to enable continuous delivery of CloudTrail events to an Amazon S3 bucket
 - Trails enable you to store records indefinitely
 - if you don't configure a trail, you can still view the most recent events in the CloudTrail **(past 90 days only)**
 - You can determine the request made, source IP address, owner of request, date and additional details
 
-__Cloudwatch__
+## Cloudwatch
 - Can monitor most of AWS as well as your applications that run on AWS
 - CloudWatch with EC2 will monitor events every 5 minutes by default
     - You can have 1 miunte intervals by turning on detailed monitoring (chargeable)
 
-__IAM Roles__
+## IAM Roles
 - Roles are more secure than storing your access and secret keys on individual EC2 instances.
 - Roles are easier to manage
 - Roles can be assigned to EC2 instances after it is created using both console and command line
 - Roles are universal - can be used in any region
 
-__High Availability approaches__
+## High Availability approaches
 - Up to date AMIs are critical for rapid fail-over
 - AMIs can be copied to other regions for safety or DR
 - Horizontally scalable architectures are preferred because risk can be spread across multiple smaller machines versus one large machine
@@ -190,12 +190,12 @@ __High Availability approaches__
 - Route53 health checks
 
 
-__AWS Server Migration Service__
+## AWS Server Migration Service
 - Is an agnet-less service which makes it easier and faster for you to migrate thousands of on-premises workloads to AWS
 - Allows to automate, schedule and track incremental replications of live server volumes, making it easier for you to coordinate large-scale server migrations
 - Replicates VMs to AWS, syncing volumes and creating periodic AMIs
 
-__High performance computing (HPC)__
+## High performance computing (HPC)
 - Create a large number of resources in almost no time. You only pay for the resources you use - and, once finished, you can destroy them
 - Can be achieved by these services
 1. Data transfer (get data into AWS)
