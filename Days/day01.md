@@ -2,32 +2,57 @@
 
 - Is a web service that provides resizable compute capacity in the cloud. It reduces the time required to obtain and boot new server instances to minutes, allowing you to quickly scale capacity, both up and down, as your computing requirements change.
 - *Pricing Models*
-    - You pay as you go and for what you use, pay less as you use more, 
-    - **On Demand** - allows you to pay a fixed rate by the hour (or by the second) with no commitment. Great for development
-        - Is useful when wanting a low cost and flexibility of EC2 without any up-front payment or long-term commitment
-        - Applications with short term, spiky, or unpredictable workloads that cannot be interrupted.
+    1. **On Demand**
+        - A fixed rate by the hour (or by the second) with no commitment. 
+        - Low cost and flexibility with no upfront cost
+        - Ideal for auto scaling groups and unpredictable workloads
         - Applications being developed or tested on EC2 for the first time
-    - **Reserver** - provides you with a capacity reservation, and offer a significant discount on the hourly charge for an instance. Contract Terms are 1 year or 3 year terms. The more you pay upfront, the more you are going to save
-        - Application with steady state or predictable usage
-        - Applications that require reserved capacity
-        - Users able to make upfront payments to reduce their total computing costs even further 
-        - **Reserve Pricing Types**
-            - Standard Reserver instances - offer up to 75% off demand instances. The more you pay up front and the longer the contract, the greater the discount (Cannot be moved across regions)
-            - Convertible Reserver instances - offer up to 54% off on demand capability to change the attributes of the RI as long as the exchange results in the creation of Reserver Instances of equal or greater value
-            - Scheduled Reserver instances - are available to launch within the time windows you reserve. It allows you to match your capacity reservation to a predictable recurring schedule that only requires a fraction of a day, week, month
+    2. **Reserver**
+        - Purchase or commit to usgae of EC2 instances in advance for significant discounts over On-Demand pricing
+        - Capacity is reserver for a term of 1 or 3 years
+        - AWS Biling automatically applies discounted rates when you launch an instance that maches your purchase RI
+        - Use for applications:
+            - Application with steady state or predictable usage
+            - Applications that require reserved capacity
+            - Upfront payments reduce the hourly rate even more
+            - Can be used in Auto Scaling Groups
+            - Can be used in Placement Groups
+            - Can be shared across multiple accounts within **Consolidated Biling**
+        - **Three types**
+            1. **Standard** - Commitment of 1 or 3 years, charged whether it's on or off. Offer up to 75% off demand instances.
+            2. **Convertible** - offer up to 54% off on demand capability to change the attributes of the RI as long as the exchange results in the creation of Reserver Instances of equal or greater value
+            3. **Scheduled** - reserved for specific periods of time, accrue charges hourly, billed in monthly increments over the term (1 year)
         - __Reserved Instances that are terminated__ are **still billed** until the end of their term according to their payment option.
         - *Note* - if it is scheduled to run only a short period, it might not be efficient to use reserved instances, because you need to pay for the whole year
-    - **Spot** - enables you to bid whatever price you want for instance capacity, providing for even greater savings if your applications have flexible start and end time. You state the price, once price is meet, instance is created. If price increases, the instance will be removed.
-        - Application that are only feasible at very low computing prices
-        - Applications that have flexible start and end time.
-        - Users with urgent computing needs for large amounts of additional capacity
+    3. **Spot** 
+        - Take advantage of unused EC2 capacity in the AWS cloud
+        - Spot instances are availbale at up to  a 90% discount compared to On-Demand prices
+        - Use for stateless, fault-tolerant, flexiable applications such as big data, containerized workloads, CI/CD, web servers, HPC
+        - Price is determined by long term trends in supply and demand for EC2 spare capacity
+            - Pay the Spot price that's in effect for the current hour for the instances that you launch
+            - Receive two-minute interruption notice when these instanes are to be reclaimed by EC2, because EC2 needs the capacity back
+            - Instances are not interrupted because of higher competing bids
+        - To reduce the impact of interruptions, difersify and run your application across multiple capacity pools
+            - Can also stop or hibernate rather than terminate instnaces when capacity is no longer available 
         - *Note*. If the spot instace is terminated by EC2, you will not be charged for a partial hour of usage. However, if you terminat the instance yourself, you will be charged for any hour in which the instance ran
-    - **Dedicated Hosts** - physical EC2 server dedicated for your use. Dedicated Hosts can help you reduce costs by allowing you to use your existing server-bound software licenses
-        - Useful for regulatory requirements that may not support multi-tenant virtualization
-        - Great for licensing which does not support multi-tenancy or cloud deployments
-        - Can be purchased On-Demand (hourly)
-        - Can be purchased as a Reservation for up to 70% off the On-Demand price
-        - With __EC2 dedicated hosts__ we have control over __number of cores__, not anywhere else.
+    4. **Dedicated Hosts**
+        - Physical servers dedicated jsut for your use
+        - Available On-Demand and Reserved pricing models
+        - Useful if you have server-bound software licenses
+        - Good for regulatory compliance or licensing requirements
+        - Predictable performance
+        - Complete isolation
+        - Most expensive option
+        - Have control over number of cores
+    5. **Dedicated Instances**
+        - Virtualized instances on hardware just for you
+        - Uses physically dedicated EC2 servers
+        - Does not provide the additional visibility and controls of dedicated hosts
+        - May share hardware with other non-dedicated instances in the same account
+        - Available as On-Demand, Reserver instances, and Spot instances
+- You are limited to running up to total of 20 On-Demand instances across the instance family, purchasing 20 Reserved instances
+- Linux instances are charged by seconds, all other instances by hour
+- Data between instances in different regions is charged (in and out)
 
 __Security groups__
 - All Inbound traffic is blocked by default
@@ -52,30 +77,64 @@ Can be selected on
 
 
 __ENI, ENA, EFA__
-- *ENI - elastic network interface* - essentially a virtual network card. Choose for basic networking, or manage multiple networks at low cost
-    1. Primary private IPv4 address from the IPv4 address range of your VPC
-    2. One or more secondary private IPv4 addresses from the IPv4 address range of your VPC
-    3. One Elastic IP address (IPv4) per private IPv4 address
-    4. One public IPv4 address
-    5. One or more IPv6 addresses
-    6. One or more security groups
-    7. A mac address
-    8. A source/destination check flag
-    9. Description
-- You can attach a network interface (ENI) to an EC2 instance in the following ways —
-    1. When it's running. Hot attach.
-    2. When it's stopped. Warm attach.
-    3. When the instance is being launched. Cold attach.
-- *EN - Enhanced networking*. Uses single root I/O virtualization to provide high-performance networking capabilities on supported instance types
-    1. Provides higher I/O performance and lower CPU utilization when compared to traditional virtualised network interface. Provides higher bandwidth, packet per second performance and lower inter-instance latencies. There is no additional charge for using enhanced networking, but EC2 must support it.
-    2. To use where you want good network performance
-    3. Can be enabled using:
-        - *Elastic Network Adapter (ENA)* which supports network speeds of up to 100Gbps for supported instance types. Always choose this method
-        - *Virtual Function (VF)* interface - suports network speeds of up to 10Gbps for supported instance types. This is typically used on older instances. 
-    4. Choose for when you need speeds between 10Gbps and 100Gbps and reliable and high throughput.
-    
-- *Elastic Fabric Adapter* - a network device that you can attach to your EC2 instance to accelerate High Performance Computing and ML applications
-    1. Choose for when you need to accelerate High Performance Comouting (HPC) and ML applications or if you need to do an OS by-pass. 
+- *ENI - elastic network interface*
+    - Essentially a virtual network card. Choose for basic networking, or manage multiple networks at low cost. Can include:
+        1. Primary private IPv4 address from the IPv4 address range of your VPC
+        2. One or more secondary private IPv4 addresses from the IPv4 address range of your VPC
+        3. One Elastic IP address (IPv4) per private IPv4 address
+        4. One public IPv4 address
+        5. One or more IPv6 addresses
+        6. One or more security groups
+        7. A mac address
+        8. A source/destination check flag
+        9. Description
+    - You can attach a network interface (ENI) to an EC2 instance in the following ways —
+        1. When it's running. **Hot attach**
+        2. When it's stopped. **Warm attach**
+        3. When the instance is being launched. **Cold attach**
+    - **eth0** is the primary network interface and cannot be moved or detached.
+        - By default, it is the only ENI created with an EC2 instance when launched
+    - ENI is bound to an AZ, you can specify which subnet/AZ you want the ENI to be added in
+    - Default interfaces are terminated with instance termination
+        - Manually added interfaces are not terminated by default
+        - You can change termination behavior
+- *EN - Enhanced networking*
+    - Uses single root I/O virtualization to provide high-performance networking capabilities on supported instance types
+        1. Provides higher I/O performance and lower CPU utilization when compared to traditional virtualised network interface. Provides higher bandwidth, packet per second performance and lower inter-instance latencies. There is no additional charge for using enhanced networking, but EC2 must support it.
+        2. To use where you want good network performance
+        3. Can be enabled using:
+            - *Elastic Network Adapter (ENA)* which supports network speeds of up to 100Gbps for supported instance types. Always choose this method
+            - *Virtual Function (VF)* interface - suports network speeds of up to 10Gbps for supported instance types. This is typically used on older instances. 
+        4. Choose for when you need speeds between 10Gbps and 100Gbps and reliable and high throughput.
+- *Elastic Fabric Adapter* 
+    - A network device that you can attach to your EC2 instance to accelerate High Performance Computing and ML applications
+    - Choose for when you need to accelerate High Performance Comouting (HPC) and ML applications or if you need to do an OS by-pass. 
+
+
+__EC2 placement groups__
+- When you launch a new EC2 instance, the EC2 service **attempts to place the instance in such a way that all of your instances are spread out across underlying hardware to minimize correlated failures.**
+- The name for placement group must be **unique** within your AWS account
+- You cant merge placement groups
+- You can move existing instance into a placement group. Before you can move the instance, the instsance must be stopped. It *can only be achieved using AWS CLI or SDK*, not yet with a console
+1. *Clustered Placement group*
+    - Grouping instances within a **single AZ** (put them very close together)
+    - Recommented for applications that need **low network latency, high network throughput, or both**
+    - Only **certain instances** can be launched in this group
+    - Can't span multiple AZ, all other groups can
+    - AWS recommneds **homogenous instances** within clustered placement group
+2. *Spread Placement group*
+    - Each instance is placed on **distinct** underlying hardware
+    - Recommended for applications that have a small number of **critical instances that should be kept separate from each other**
+        - For example if one applications fails, it should not effect the others
+    - Can have in **different AZ within a region**
+    - Think like separate instances
+3. *Partitioned*
+    - AWS divides each group into **logical segments called partitions.**
+    - Each partition within a placement group has its own **set of racks**. Each eack has its **own network and power source.**
+    - No two partitions within a placement group share the same racks, allowing you to **isolate** the impact of hardware failure within your application
+    - Think like multiple instances
+
+
 
 __SPOT instances and fleets__
 - Use unused EC2 capacity in the AWS cloud. Are available at up to 90% discount comparaed to On-Demand. Can use for stateless, fault-tolerant or flexiable applications, such as big data, containeriz workloads, CI/CD, web servers, HPC and other test workloads. They are not good for persistent workloads, critical jobs and databases
@@ -107,11 +166,15 @@ __EC2 Hipernate__
 
 __Cloudtrail__
 - increases visibility into your user and resource activity by recording AWS Management COnsole actions and API calls
+- Can create a **trail** to enable continuous delivery of CloudTrail events to an Amazon S3 bucket
+- Trails enable you to store records indefinitely
+- if you don't configure a trail, you can still view the most recent events in the CloudTrail **(past 90 days only)**
+- You can determine the request made, source IP address, owner of request, date and additional details
 
 __Cloudwatch__
 - Can monitor most of AWS as well as your applications that run on AWS
 - CloudWatch with EC2 will monitor events every 5 minutes by default
-- You can have 1 miunte intervals by turning on detailed monitoring
+    - You can have 1 miunte intervals by turning on detailed monitoring (chargeable)
 
 __IAM Roles__
 - Roles are more secure than storing your access and secret keys on individual EC2 instances.
@@ -119,29 +182,18 @@ __IAM Roles__
 - Roles can be assigned to EC2 instances after it is created using both console and command line
 - Roles are universal - can be used in any region
 
+__High Availability approaches__
+- Up to date AMIs are critical for rapid fail-over
+- AMIs can be copied to other regions for safety or DR
+- Horizontally scalable architectures are preferred because risk can be spread across multiple smaller machines versus one large machine
+- Auto scaling and ELB work together to provide automated recovery by maintaining minimum instances
+- Route53 health checks
 
-__EC2 placement groups__
-- When you launch a new EC2 instance, the EC2 service **attempts to place the instance in such a way that all of your instances are spread out across underlying hardware to minimize correlated failures.**
-- The name for placement group must be **unique** within your AWS account
-- You cant merge placement groups
-- You can move existing instance into a placement group. Before you can move the instance, the instsance must be stopped. It *can only be achieved using AWS CLI or SDK*, not yet with a console
-1. *Clustered Placement group*
-    - Grouping instances within a **single AZ** (put them very close together)
-    - Recommented for applications that need **low network latency, high network throughput, or both**
-    - Only **certain instances** can be launched in this group
-    - Can't span multiple AZ, all other groups can
-    - AWS recommneds **homogenous instances** within clustered placement group
-2. *Spread Placement group*
-    - Each instance is placed on **distinct** underlying hardware
-    - Recommended for applications that have a small number of **critical instances that should be kept separate from each other**
-        - For example if one applications fails, it should not effect the others
-    - Can have in **different AZ within a region**
-    - Think like separate instances
-3. *Partitioned*
-    - AWS divides each group into **logical segments called partitions.**
-    - Each partition within a placement group has its own **set of racks**. Each eack has its **own network and power source.**
-    - No two partitions within a placement group share the same racks, allowing you to **isolate** the impact of hardware failure within your application
-    - Think like multiple instances
+
+__AWS Server Migration Service__
+- Is an agnet-less service which makes it easier and faster for you to migrate thousands of on-premises workloads to AWS
+- Allows to automate, schedule and track incremental replications of live server volumes, making it easier for you to coordinate large-scale server migrations
+- Replicates VMs to AWS, syncing volumes and creating periodic AMIs
 
 __High performance computing (HPC)__
 - Create a large number of resources in almost no time. You only pay for the resources you use - and, once finished, you can destroy them
