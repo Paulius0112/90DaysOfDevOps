@@ -53,6 +53,8 @@
 - You are limited to running up to total of 20 On-Demand instances across the instance family, purchasing 20 Reserved instances
 - Linux instances are charged by seconds, all other instances by hour
 - Data between instances in different regions is charged (in and out)
+- **On-Demand Capacity Reservation** and **Zonal Reserved Instances** provide a capacity reservation for EC2 instances in a specific AZ
+
 
 ## Security groups
 - All Inbound traffic is blocked by default
@@ -135,6 +137,42 @@ Can be selected on
     - Think like multiple instances
 
 
+## Auto Scaling
+- Monitors your applications and automatically adjusts capacity to maintain steady, predictable performance at the lowest possible cost
+- Available services for **auto-scaling** include:
+    1. **EC2**
+    2. **ECS**
+    3. **DynamoDB**
+    4. **Aurora**
+- You create a collections of EC2 isntances (Auto Scaling groups) and AWS automatically provides **horizontal** scaling for your instances
+- It is a **region-specific** service
+- No cost for auto scaling, only for resources
+- **Launch configuration** is the template used to create new EC2 instances and include parameters such as instance family, type, AMI, key pair and security groups
+- **Types**
+| Scaling        | Description                                                      | When to use                                                               |
+|----------------|------------------------------------------------------------------|---------------------------------------------------------------------------|
+| **Maintain**   | Ensures the required number of instances are running             | Use when you always need a known number of instances running at all times |
+| **Manual**     | Manually change desired capacity                                 | Use when your needs change rarely enough that you're ok to make manual changes       |
+| **Scheduled**  | Adjust min/max on specific dates/times or recurring time periods | Use when you know when your busy and quiet times are. Useful for ensuring enough instances are available befure very busy times |
+| **Dynamic**    | Scale in response to system load or other triggers using metrics | useful for changing capacity based on system utilisation |
+| **Predictive** | Predict capacity required ahead of time using ML                 | Useful for when capacity, and number of instances is unknown |
+
+- Scaling policies for **Dynamic scaling**
+| Scaling policy             | What it is                                                                                       | When to use |
+|----------------------------|--------------------------------------------------------------------------------------------------|-------------|
+| **Target Tracking policy** | Adds or removes capacity as required to keep the metric at or close to the specific target value | You want to keep the CPU usage of our ASG at 70% |
+| **Simple Scaling Policy**  | Waits for the health check and cool down periods to expire before re-evaluating                  | Useful when load is erratic. AWS recommends step staling instead of simple in most cases |
+| **Step Scaling Policy**    | Increases or decreases the configured capacity of the Auto Scaling group based on a set of scaling adjustments, know as a step adjustment | You want to vary adjustments based on the size of the alarm breach |
+
+- **Scaling based on Amazon SQS**
+    - Uses a custom metric that's sent to Amazon CloudWatch that measures the number of messages in the queue per EC2 instance in the Auto Scaling group
+    - **Target tracking policy** scales based on the custom metric and a set target value. CloudWatch alarms invoke the scaling policy
+- Uses **serivce-linked roles** - is a unique type of IAM role that is linked directly to an AWS service
+
+__ASG Behavior and Configuration__
+- Termination policies control the instances which are terminated first when a scale-in event occurs
+    - The default termination policy ensures thats EC2 instances span AZ evenly for high availability
+    - You can enable **Instance Protection** which prevents Auto Scaling from scaling in and terminating the EC2 instances
 
 ## SPOT instances and fleets
 - Use unused EC2 capacity in the AWS cloud. Are available at up to 90% discount comparaed to On-Demand. Can use for stateless, fault-tolerant or flexiable applications, such as big data, containeriz workloads, CI/CD, web servers, HPC and other test workloads. They are not good for persistent workloads, critical jobs and databases
@@ -194,6 +232,7 @@ __Spot fleets__
 - Is an agnet-less service which makes it easier and faster for you to migrate thousands of on-premises workloads to AWS
 - Allows to automate, schedule and track incremental replications of live server volumes, making it easier for you to coordinate large-scale server migrations
 - Replicates VMs to AWS, syncing volumes and creating periodic AMIs
+
 
 ## High performance computing (HPC)
 - Create a large number of resources in almost no time. You only pay for the resources you use - and, once finished, you can destroy them
